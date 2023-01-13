@@ -6,13 +6,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kouros"
+	"kouros/pos"
 	"pnconnector/src/log"
 	"time"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"google.golang.org/grpc"
 )
+
+func GetPOSManager() (pos.POSManager, error) {
+	posMngr, err := kouros.NewPOSManager(pos.GRPC)
+	if err != nil {
+		return nil, err
+	}
+	posMngr.Init("cli", globals.IPv4+":"+globals.GrpcPort)
+	return posMngr, err
+}
 
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
@@ -1114,24 +1125,24 @@ func SendQosResetVolumePolicy(req *pb.QosResetVolumePolicyRequest) (*pb.QosReset
 }
 
 func SendVolumeRename(req *pb.VolumeRenameRequest) (*pb.VolumeRenameResponse, error) {
-    conn, err := dialToCliServer()
-    if err != nil {
-        log.Error(err)
-        errToReturn := errors.New(dialErrorMsg)
-        return nil, errToReturn
-    }
-    defer conn.Close()
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
 
-    c := pb.NewPosCliClient(conn)
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-    defer cancel()
-    res, err := c.VolumeRename(ctx, req)
-    if err != nil {
-        log.Error("error: ", err.Error())
-        return nil, err
-    }
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+	res, err := c.VolumeRename(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
-    return res, err
+	return res, err
 
 }
 
@@ -1158,24 +1169,24 @@ func SendListWBT(req *pb.ListWBTRequest) (*pb.ListWBTResponse, error) {
 }
 
 func SendListQOSPolicy(req *pb.ListQOSPolicyRequest) (*pb.ListQOSPolicyResponse, error) {
-    conn, err := dialToCliServer()
-    if err != nil {
-        log.Error(err)
-        errToReturn := errors.New(dialErrorMsg)
-        return nil, errToReturn
-    }
-    defer conn.Close()
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
 
-    c := pb.NewPosCliClient(conn)
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-    defer cancel()
-    res, err := c.ListQOSPolicy(ctx, req)
-    if err != nil {
-        log.Error("error: ", err.Error())
-        return nil, err
-    }
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+	res, err := c.ListQOSPolicy(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
-    return res, err
+	return res, err
 }
 
 func SendWBT(req *pb.WBTRequest) (*pb.WBTResponse, error) {
