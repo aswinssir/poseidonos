@@ -247,7 +247,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 
 	case "LISTVOLUME":
 		res := &pb.ListVolumeResponse{}
-		json.Unmarshal([]byte(resJson), &res)
+		protojson.Unmarshal([]byte(resJson), res)
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
 			printEvent(*status)
@@ -297,6 +297,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 					globals.FieldSeparator+strconv.FormatUint(volume.GetMaxbw(), 10)+"\t"+
 					globals.FieldSeparator+strconv.FormatUint(volume.GetMiniops(), 10)+"\t"+
 					globals.FieldSeparator+strconv.FormatUint(volume.GetMinbw(), 10))
+
 		}
 		w.Flush()
 

@@ -33,7 +33,7 @@ Syntax:
 			fmt.Printf("failed to connect to POS: %v", err)
 			return err
 		}
-		res, req, gRpcErr := posMgr.StartTelemetry()
+		res, req, gRpcErr := posMgr.GetSystemInfo()
 
 		printReqErr := displaymgr.PrintProtoReqJson(req)
 		if printReqErr != nil {

@@ -60,7 +60,7 @@ Example:
 
 func formResetVolumePolicyReqParam() *pb.QosResetVolumePolicyRequest_Param {
 
-	volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
+	volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
 	var volumeNames []*pb.QosVolumeNameParam
 	for _, str := range volumeNameListSlice {
 		volumeName := &pb.QosVolumeNameParam{
@@ -69,7 +69,7 @@ func formResetVolumePolicyReqParam() *pb.QosResetVolumePolicyRequest_Param {
 		volumeNames = append(volumeNames, volumeName)
 	}
 	param := &pb.QosResetVolumePolicyRequest_Param{
-		Array: volumePolicy_arrayName,
+		Array: volumeReset_arrayName,
 		Vol:   volumeNames,
 	}
 

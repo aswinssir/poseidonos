@@ -4,6 +4,8 @@ go 1.14
 
 replace pnconnector => ./lib/pnconnector
 
+replace kouros => ../kouros
+
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20210608160410-67692ebc98de
 	github.com/c2h5oh/datasize v0.0.0-20200825124411-48ed595a09d2
@@ -18,8 +20,9 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.9.0
 	go.opentelemetry.io/otel/sdk v1.9.0
 	go.opentelemetry.io/otel/trace v1.9.0
-	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1
-	google.golang.org/grpc v1.46.2
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/genproto v0.0.0-20220913154956-18f8339a66a5
+	google.golang.org/grpc v1.49.0
+	google.golang.org/protobuf v1.28.1
+	kouros v0.0.0-00010101000000-000000000000 // indirect
 	pnconnector v0.0.0-00010101000000-000000000000
 )
