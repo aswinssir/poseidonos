@@ -1,7 +1,6 @@
 package displaymgr
 
 import (
-	pb "kouros/api"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"code.cloudfoundry.org/bytefmt"
@@ -9,6 +8,7 @@ import (
 	"fmt"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	pb "kouros/api"
 	"os"
 	"pnconnector/src/util"
 	"strconv"

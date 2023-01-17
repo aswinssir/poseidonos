@@ -1,22 +1,26 @@
-package grpcmgr
+package postgres
 
 import (
-	"cli/cmd/globals"
 	sql "database/sql"
-	"errors"
 	"fmt"
 	pb "kouros/api"
-	"os"
 )
 
 const listNodeQuery = `SELECT "name","ip","lastseen" FROM "node"`
 const listVolumeQuery = `SELECT "id","name","node_name","array_name","size","lastseen" FROM "volume"`
 const listReplicationQuery = `SELECT "id","source_volume_id","source_wal_volume_id","destination_volume_id","destination_wal_volume_id" FROM "replication"`
-const getIpv4Query = `SELECT "ip" FROM "node" WHERE "name"='%s'`
 
-func SendListNode(req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
+type PostgresConnection struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	DBName   string
+}
 
-	db, err := OpenHaDb()
+func SendListNode(conn PostgresConnection, req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
+
+	db, err := OpenHaDb(conn)
 
 	// close database
 	defer db.Close()
@@ -53,9 +57,9 @@ func SendListNode(req *pb.ListNodeRequest) (*pb.ListNodeResponse, error) {
 	return res, nil
 }
 
-func SendListHaVolume(req *pb.ListHaVolumeRequest) (*pb.ListHaVolumeResponse, error) {
+func SendListHaVolume(conn PostgresConnection, req *pb.ListHaVolumeRequest) (*pb.ListHaVolumeResponse, error) {
 
-	db, err := OpenHaDb()
+	db, err := OpenHaDb(conn)
 
 	// close database
 	defer db.Close()
@@ -99,9 +103,9 @@ func SendListHaVolume(req *pb.ListHaVolumeRequest) (*pb.ListHaVolumeResponse, er
 	return res, nil
 }
 
-func SendListHaReplication(req *pb.ListHaReplicationRequest) (*pb.ListHaReplicationResponse, error) {
+func SendListHaReplication(conn PostgresConnection, req *pb.ListHaReplicationRequest) (*pb.ListHaReplicationResponse, error) {
 
-	db, err := OpenHaDb()
+	db, err := OpenHaDb(conn)
 
 	// close database
 	defer db.Close()
@@ -148,9 +152,9 @@ func SendListHaReplication(req *pb.ListHaReplicationRequest) (*pb.ListHaReplicat
 	return res, nil
 }
 
-func SendStartHaReplication(req *pb.StartHaReplicationRequest) (*pb.StartHaReplicationResponse, error) {
+func SendStartHaReplication(conn PostgresConnection, req *pb.StartHaReplicationRequest) (*pb.StartHaReplicationResponse, error) {
 
-	db, err := OpenHaDb()
+	db, err := OpenHaDb(conn)
 
 	// close database
 	defer db.Close()
@@ -207,11 +211,8 @@ func SendStartHaReplication(req *pb.StartHaReplicationRequest) (*pb.StartHaRepli
 	return res, nil
 }
 
-func OpenHaDb() (*sql.DB, error) {
-	host, port, username, password, dbname, err := GetHaDbInfo()
-	if err != nil {
-		fmt.Println(err)
-	}
+func OpenHaDb(conn PostgresConnection) (*sql.DB, error) {
+	host, port, username, password, dbname := GetHaDbInfo(conn)
 
 	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, username, password, dbname)
@@ -225,74 +226,6 @@ func OpenHaDb() (*sql.DB, error) {
 	return db, err
 }
 
-func GetHaDbInfo() (string, string, string, string, string, error) {
-
-	var host, port, username, password, dbname string
-	var exists bool
-
-	host, exists = os.LookupEnv(globals.HaDbIPVar)
-	if !exists {
-		return "", "", "", "", "", errors.New("You must set the IP address as a environmental variable: " + globals.HaDbIPVar)
-	}
-
-	port, exists = os.LookupEnv(globals.HaDbPortVar)
-	if !exists {
-		return "", "", "", "", "", errors.New("You must set the port number as a environmental variable: " + globals.HaDbPortVar)
-	}
-
-	username, exists = os.LookupEnv(globals.HaDbUserVar)
-	if !exists {
-		return "", "", "", "", "", errors.New("You must set the username as a environmental variable: " + globals.HaDbNameVar)
-	}
-
-	password, exists = os.LookupEnv(globals.HaDbPasswordVar)
-	if !exists {
-		return "", "", "", "", "", errors.New("You must set the password as a environmental variable: " + globals.HaDbPasswordVar)
-	}
-
-	dbname, exists = os.LookupEnv(globals.HaDbNameVar)
-	if !exists {
-		return "", "", "", "", "", errors.New("You must set the database name as a environmental variable: " + globals.HaDbNameVar)
-	}
-
-	return host, port, username, password, dbname, nil
-}
-
-func GetIpv4(nodeName string) (string, error) {
-	db, err := OpenHaDb()
-	if err != nil {
-		return "", errors.New("an error occured while opening ha database: " + err.Error())
-	}
-
-	// close database
-	defer db.Close()
-	// check db
-	err = db.Ping()
-	if err != nil {
-		return "", errors.New("an error occured while ping to ha database: " + err.Error())
-	}
-
-	query := fmt.Sprintf(getIpv4Query, nodeName)
-	rows, err := db.Query(query)
-	if err != nil {
-		return "", errors.New("an error occured while query to ha database: " + err.Error())
-	}
-
-	defer rows.Close()
-
-	var (
-		NodegRpcIp   string = ""
-		NodegRpcPort string = globals.GrpcPort
-	)
-
-	for rows.Next() {
-		err = rows.Scan(&NodegRpcIp)
-		if err != nil {
-			return "", errors.New("an error occured while scanning ha database: " + err.Error())
-		}
-	}
-
-	gRpcAddress := fmt.Sprintf("%s:%s", NodegRpcIp, NodegRpcPort)
-
-	return gRpcAddress, nil
+func GetHaDbInfo(conn PostgresConnection) (string, string, string, string, string) {
+	return conn.Host, conn.Port, conn.Username, conn.Password, conn.DBName
 }

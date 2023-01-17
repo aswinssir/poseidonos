@@ -40,6 +40,9 @@ Example:
 			fmt.Printf("failed to connect to POS: %v", err)
 			return err
 		}
+		if cmd.Flags().Changed("timeout") {
+			posMgr = posMgr.WithTimeout(globals.ReqTimeout)
+		}
 
 		res, req, gRpcErr := posMgr.MountArray(reqParam)
 

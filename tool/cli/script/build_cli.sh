@@ -21,6 +21,7 @@ protoc --go_out=../kouros/api --go_opt=paths=source_relative \
 # Build CLI binary
 lib/pnconnector/script/build_resource.sh
 
+go mod vendor
 
 # Build CLI
 ${GO} build -tags debug,ssloff -ldflags "-X cli/cmd.PosCliVersion=$POS_CLI_VERSION -X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI -X cli/cmd.RootDir=$ROOT_DIR"

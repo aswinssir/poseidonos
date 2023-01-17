@@ -1,8 +1,8 @@
 package clustercmds
 
 import (
-	pb "kouros/api"
 	"fmt"
+	pb "kouros/api"
 	"log"
 
 	"cli/cmd/globals"
